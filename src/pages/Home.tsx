@@ -1,66 +1,47 @@
-import { Camera, FileText, Mic, SearchCheck } from 'lucide-react';
-import Disclaimer from '../components/Disclaimer';
-import InstallPrompt from '../components/InstallPrompt';
-import type { Scenario } from '../types';
-
-const scenarios: Scenario[] = ['租房', '劳动', '消费', '合同'];
+import { Camera, FileText, ShieldCheck } from 'lucide-react';
 
 interface HomeProps {
-  onStart: (scenario?: Scenario) => void;
+  onImageInput: () => void;
+  onTextInput: () => void;
 }
 
-export default function Home({ onStart }: HomeProps) {
+export default function Home({ onImageInput, onTextInput }: HomeProps) {
   return (
-    <div className="page">
-      <section className="hero">
-        <div className="hero-mark">
-          <SearchCheck size={28} aria-hidden="true" />
+    <section className="phone-page home-page">
+      <div className="status-copy">AI 法律风险检索助手</div>
+
+      <header className="home-hero">
+        <div className="product-mark" aria-hidden="true">
+          <ShieldCheck size={30} />
         </div>
-        <p className="eyebrow">RAG · OCR · 语音输入 · 法条引用</p>
         <h1>法律风险识别助手</h1>
-        <p className="hero-subtitle">拍照、语音或输入文字，快速识别生活场景中的法律风险</p>
-      </section>
+        <p>提出问题，查找来源链接，定位具体法条，再生成解决方案。</p>
+      </header>
 
-      <section className="entry-grid" aria-label="输入方式">
-        <button className="entry-card" onClick={() => onStart()} type="button">
-          <Camera size={24} aria-hidden="true" />
-          <span>拍照识别</span>
+      <div className="entry-actions" aria-label="选择输入方式">
+        <button className="entry-button primary-entry" onClick={onImageInput} type="button">
+          <Camera size={22} aria-hidden="true" />
+          上传合同/截图
         </button>
-        <button className="entry-card" onClick={() => onStart()} type="button">
-          <Mic size={24} aria-hidden="true" />
-          <span>语音输入</span>
+        <button className="entry-button" onClick={onTextInput} type="button">
+          <FileText size={22} aria-hidden="true" />
+          输入法律问题
         </button>
-        <button className="entry-card" onClick={() => onStart()} type="button">
-          <FileText size={24} aria-hidden="true" />
-          <span>文字咨询</span>
-        </button>
-      </section>
+      </div>
 
-      <section className="section-block">
-        <div className="section-title">
-          <h2>常见场景</h2>
-          <span>先识别事实，再匹配依据</span>
-        </div>
-        <div className="scenario-list">
-          {scenarios.map((scenario) => (
-            <button key={scenario} className="scenario-chip" onClick={() => onStart(scenario)} type="button">
-              {scenario === '租房' ? '租房押金' : scenario === '劳动' ? '劳动加班' : scenario === '消费' ? '消费退款' : '合同纠纷'}
-            </button>
-          ))}
+      <section className="quiet-panel">
+        <h2>严谨检索流程</h2>
+        <div className="mini-grid">
+          <span>提出问题</span>
+          <span>查找链接</span>
+          <span>定位法条</span>
+          <span>形成方案</span>
+          <span>证据清单</span>
+          <span>免责声明</span>
         </div>
       </section>
 
-      <section className="principle-panel">
-        <h2>输出原则</h2>
-        <ul>
-          <li>不直接武断判断“合法/违法”</li>
-          <li>没有法条依据时明确提示无法找到依据</li>
-          <li>用风险等级、事实摘要和法条来源控制幻觉</li>
-        </ul>
-      </section>
-
-      <InstallPrompt />
-      <Disclaimer />
-    </div>
+      <p className="bottom-note">本工具只提供法律信息检索与风险提示，不直接作出“违法/合法”的绝对判断。</p>
+    </section>
   );
 }

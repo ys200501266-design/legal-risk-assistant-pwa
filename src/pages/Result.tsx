@@ -1,6 +1,27 @@
-import { ArrowLeft, BookOpenText, CheckCircle2, FileSearch, Lightbulb, Scale, ShieldAlert } from 'lucide-react';
-import Disclaimer from '../components/Disclaimer';
-import type { LegalCase, RiskLevel } from '../types';
+import {
+  BookOpenText,
+  CheckCircle2,
+  ExternalLink,
+  FileSearch,
+  History,
+  Link2,
+  MessageCircle,
+  RefreshCcw,
+  Save,
+  ShieldAlert,
+} from 'lucide-react';
+import { useEffect, useMemo, useState } from 'react';
+import { analyzeLegalQuestion } from '../lib/legalAnalysis';
+import type { AnalysisInput, RiskLevel } from '../types';
+
+interface ResultProps {
+  input: AnalysisInput;
+  isSaved: boolean;
+  onAsk: () => void;
+  onHistory: () => void;
+  onRestart: () => void;
+  onSave: () => void;
+}
 
 const riskClass: Record<RiskLevel, string> = {
   低风险: 'risk-low',
@@ -9,103 +30,165 @@ const riskClass: Record<RiskLevel, string> = {
   无法判断: 'risk-unknown',
 };
 
-interface ResultProps {
-  caseData: LegalCase;
-  onBackHome: () => void;
-}
+export default function Result({ input, isSaved, onAsk, onHistory, onRestart, onSave }: ResultProps) {
+  const [saved, setSaved] = useState(isSaved);
+  const [showToast, setShowToast] = useState(false);
+  const analysis = useMemo(() => analyzeLegalQuestion(input), [input]);
 
-export default function Result({ caseData, onBackHome }: ResultProps) {
+  useEffect(() => {
+    setSaved(isSaved);
+  }, [isSaved, input.text, input.scenario]);
+
+  const save = () => {
+    if (!saved) {
+      onSave();
+      setSaved(true);
+    }
+    setShowToast(true);
+    window.setTimeout(() => setShowToast(false), 1600);
+  };
+
   return (
-    <div className="page result-page">
-      <header className="top-bar">
-        <button className="icon-button" onClick={onBackHome} type="button" aria-label="返回首页">
-          <ArrowLeft size={22} aria-hidden="true" />
+    <section className="phone-page result-page">
+      <header className="result-header">
+        <span>{analysis.scenario}场景</span>
+        <button className="text-button" onClick={onHistory} type="button">
+          <History size={16} aria-hidden="true" />
+          历史记录
         </button>
-        <div>
-          <p>风险提示结果</p>
-          <h1>基于事实与法条的提示</h1>
-        </div>
       </header>
 
-      <section className="result-summary">
-        <div>
-          <span className="summary-label">识别到的问题</span>
-          <h2>{caseData.userInput}</h2>
-        </div>
-        <div className={`risk-badge ${riskClass[caseData.riskLevel]}`}>
-          <ShieldAlert size={18} aria-hidden="true" />
-          {caseData.riskLevel}
+      <section className="result-hero single-result-hero">
+        <div className={`risk-summary compact-risk ${riskClass[analysis.riskLevel]}`}>
+          <div>
+            <p>风险等级</p>
+            <h1>{analysis.riskLevel}</h1>
+          </div>
+          <ShieldAlert size={34} aria-hidden="true" />
         </div>
       </section>
 
-      <section className="result-card">
-        <div className="card-heading">
-          <FileSearch size={20} aria-hidden="true" />
-          <h2>事实摘要</h2>
-        </div>
+      <section className="content-card chain-card">
+        <div className="chain-step-label">1. 提出问题</div>
+        <h2>识别到的问题</h2>
+        <p className="lead-text">{analysis.recognizedQuestion}</p>
         <ul className="fact-list">
-          {caseData.extractedFacts.map((fact) => (
+          {analysis.extractedFacts.map((fact) => (
             <li key={fact}>{fact}</li>
           ))}
         </ul>
       </section>
 
-      <section className="result-card">
-        <div className="card-heading">
-          <BookOpenText size={20} aria-hidden="true" />
-          <h2>相关法律依据</h2>
+      <section className="content-card chain-card">
+        <div className="card-title-row">
+          <Link2 size={19} aria-hidden="true" />
+          <h2>2. 查找链接</h2>
         </div>
-        {caseData.relatedLaws.length > 0 ? (
+        <p className="helper-text no-margin">本次结果只基于下列来源链接进行模拟检索；正式版应实时抓取或接入法规库。</p>
+        <div className="source-list">
+          {analysis.searchSources.map((source) => (
+            <a className="source-item" href={source.url} key={`${source.title}-${source.url}`} rel="noreferrer" target="_blank">
+              <div>
+                <strong>{source.title}</strong>
+                <span>{source.purpose}</span>
+              </div>
+              <ExternalLink size={16} aria-hidden="true" />
+            </a>
+          ))}
+        </div>
+      </section>
+
+      <section className="content-card law-card compact-card">
+        <div className="card-title-row">
+          <BookOpenText size={19} aria-hidden="true" />
+          <h2>3. 定位相关法律条文</h2>
+        </div>
+
+        {analysis.relatedLaws.length ? (
           <div className="law-list">
-            {caseData.relatedLaws.map((law) => (
-              <article className="law-card" key={`${law.lawName}-${law.article}`}>
-                <div>
-                  <h3>{law.lawName}</h3>
-                  <span>{law.article}</span>
+            {analysis.relatedLaws.map((law) => (
+              <article className="precise-law-card" key={`${law.lawName}-${law.article}`}>
+                <div className="law-title-row">
+                  <div>
+                    <strong>{law.lawName}</strong>
+                    <span>
+                      {law.article}
+                      {law.articleTitle ? `：${law.articleTitle}` : ''}
+                    </span>
+                  </div>
+                  <a href={law.sourceUrl} rel="noreferrer" target="_blank" aria-label="查看来源">
+                    <ExternalLink size={16} aria-hidden="true" />
+                  </a>
                 </div>
-                <p>{law.summary}</p>
-                <a href={law.sourceUrl} rel="noreferrer" target="_blank">
-                  查看来源
-                </a>
+                <div className="quote-box compact-quote">
+                  <strong>条文摘要</strong>
+                  <p>{law.summary}</p>
+                </div>
+                <p className="relevance-text">
+                  <strong>与本问题的关系：</strong>
+                  {law.relevance}
+                </p>
               </article>
             ))}
           </div>
         ) : (
-          <p className="empty-law">未找到明确法律依据，建议补充信息或咨询专业人士。</p>
+          <p className="law-warning">未找到明确法律依据，建议补充信息或咨询专业人士。</p>
         )}
       </section>
 
-      <section className="result-card">
-        <div className="card-heading">
-          <Scale size={20} aria-hidden="true" />
-          <h2>AI 解释</h2>
+      <section className="content-card chain-card">
+        <div className="card-title-row">
+          <FileSearch size={19} aria-hidden="true" />
+          <h2>4. 思考解决问题</h2>
         </div>
-        <p>{caseData.explanation}</p>
+        <p>{analysis.reasoning}</p>
+        {analysis.noBasisMessage ? <p className="law-warning">{analysis.noBasisMessage}</p> : null}
       </section>
 
-      <section className="result-card">
-        <div className="card-heading">
-          <Lightbulb size={20} aria-hidden="true" />
-          <h2>下一步建议</h2>
-        </div>
-        <ul className="suggestion-list">
-          {caseData.suggestions.map((suggestion) => (
-            <li key={suggestion}>
-              <CheckCircle2 size={18} aria-hidden="true" />
-              <span>{suggestion}</span>
+      <section className="content-card first-action">
+        <h2>解决方案</h2>
+        <ol className="action-list">
+          {analysis.solutionPlan.map((action) => (
+            <li key={action}>{action}</li>
+          ))}
+        </ol>
+      </section>
+
+      <section className="content-card">
+        <h2>还需要补充的材料</h2>
+        <ul className="evidence-list">
+          {analysis.nextEvidence.map((item) => (
+            <li key={item}>
+              <CheckCircle2 size={16} aria-hidden="true" />
+              <span>{item}</span>
             </li>
           ))}
         </ul>
       </section>
 
-      <Disclaimer />
+      <p className="result-disclaimer">{analysis.disclaimer}</p>
 
-      <div className="bottom-action">
-        <button className="primary-button" onClick={onBackHome} type="button">
-          <ArrowLeft size={20} aria-hidden="true" />
-          返回首页
+      {showToast ? (
+        <div className="save-toast" role="status">
+          <CheckCircle2 size={18} aria-hidden="true" />
+          已保存到历史记录
+        </div>
+      ) : null}
+
+      <div className="result-actions">
+        <button className="secondary-button" onClick={onAsk} type="button">
+          <MessageCircle size={18} aria-hidden="true" />
+          继续追问
+        </button>
+        <button className={saved ? 'secondary-button saved-button' : 'secondary-button'} onClick={save} type="button">
+          {saved ? <CheckCircle2 size={18} aria-hidden="true" /> : <Save size={18} aria-hidden="true" />}
+          {saved ? '已保存' : '保存结果'}
+        </button>
+        <button className="secondary-button" onClick={onRestart} type="button">
+          <RefreshCcw size={18} aria-hidden="true" />
+          重新检索
         </button>
       </div>
-    </div>
+    </section>
   );
 }

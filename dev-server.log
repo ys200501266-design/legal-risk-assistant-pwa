@@ -1,0 +1,30 @@
+
+  [32m[1mVITE[22m v7.3.5[39m  [2mready in [0m[1m1098[22m[2m[0m ms[22m
+
+  [32m➜[39m  [1mLocal[22m:   [36mhttp://127.0.0.1:[1m5173[22m/[39m
+[2m19:55:13[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mpage reload [39m[2m.tmp-edge-screenshots/Default/Extensions/ncennffkjdiamlpmcbajkmaiiiddgioo/3.52.5_0/options.html[22m
+[2m19:55:13[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mpage reload [39m[2m.tmp-edge-screenshots/Default/Extensions/ncennffkjdiamlpmcbajkmaiiiddgioo/3.52.5_0/popup.html[22m
+[2m19:55:13[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mpage reload [39m[2m.tmp-edge-screenshots/Default/Extensions/ncennffkjdiamlpmcbajkmaiiiddgioo/3.52.5_0/xl-images.html[22m
+[2m19:57:08[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mpage reload [39m[2m.tmp-edge-history-shot/Default/Extensions/ncennffkjdiamlpmcbajkmaiiiddgioo/3.52.5_0/options.html[22m
+[2m19:57:08[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mpage reload [39m[2m.tmp-edge-history-shot/Default/Extensions/ncennffkjdiamlpmcbajkmaiiiddgioo/3.52.5_0/popup.html[22m
+[2m19:57:08[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mpage reload [39m[2m.tmp-edge-history-shot/Default/Extensions/ncennffkjdiamlpmcbajkmaiiiddgioo/3.52.5_0/xl-images.html[22m
+[2m19:57:13[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mpage reload [39m[2m.tmp-edge-history-shot/Default/Extensions/ghbmnnjooekpmoecnnnilnnbdlolhkhi/1.107.1_0/offscreendocument.html[22m
+[2m20:06:28[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/App.tsx[22m
+[2m20:06:49[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/App.tsx[22m
+[2m20:06:58[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/pages/Result.tsx[22m
+[2m20:07:27[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/pages/Result.tsx[22m
+[2m20:07:36[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/pages/History.tsx[22m
+[2m20:07:57[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/pages/History.tsx[22m
+[2m20:09:10[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/styles.css[22m
+[2m20:10:21[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/App.tsx[22m
+[2m20:10:34[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/pages/Result.tsx[22m
+[2m20:11:47[22m [36m[1m[vite][22m[39m [32mvite.config.ts changed, restarting server...[39m
+[2m20:11:48[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m Re-optimizing dependencies because lockfile has changed
+[2m20:11:48[22m [36m[1m[vite][22m[39m server restarted.
+[2m20:22:38[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mpage reload [39m[2m.tmp-edge-history-shot/Default/Extensions/ghbmnnjooekpmoecnnnilnnbdlolhkhi/1.107.1_0/offscreendocument.html[22m
+[2m20:22:38[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mpage reload [39m[2m.tmp-edge-history-shot/Default/Extensions/ncennffkjdiamlpmcbajkmaiiiddgioo/3.52.5_0/popup.html[22m
+[2m20:22:38[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mpage reload [39m[2m.tmp-edge-history-shot/Default/Extensions/ncennffkjdiamlpmcbajkmaiiiddgioo/3.52.5_0/xl-images.html[22m
+[2m20:22:38[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mpage reload [39m[2m.tmp-edge-history-shot/Default/Extensions/ncennffkjdiamlpmcbajkmaiiiddgioo/3.52.5_0/options.html[22m
+[2m20:22:39[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mpage reload [39m[2m.tmp-edge-screenshots/Default/Extensions/ncennffkjdiamlpmcbajkmaiiiddgioo/3.52.5_0/options.html[22m
+[2m20:22:39[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mpage reload [39m[2m.tmp-edge-screenshots/Default/Extensions/ncennffkjdiamlpmcbajkmaiiiddgioo/3.52.5_0/popup.html[22m
+[2m20:22:39[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mpage reload [39m[2m.tmp-edge-screenshots/Default/Extensions/ncennffkjdiamlpmcbajkmaiiiddgioo/3.52.5_0/xl-images.html[22m

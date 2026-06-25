@@ -1,73 +1,104 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
+import FollowUp from './pages/FollowUp';
+import History from './pages/History';
 import Home from './pages/Home';
-import Analyze from './pages/Analyze';
+import Input from './pages/Input';
+import Processing from './pages/Processing';
 import Result from './pages/Result';
-import legalCases from './data/legal_cases.json';
-import type { AnalysisInput, LegalCase } from './types';
+import { defaultSourceLinks } from './lib/legalAnalysis';
+import type { AnalysisInput, HistoryItem, Route } from './types';
 
-type Route = 'home' | 'analyze' | 'result';
+const HISTORY_KEY = 'legal-risk-assistant-history';
 
-const cases = legalCases as LegalCase[];
+const defaultInput: AnalysisInput = {
+  text: '',
+  scenario: '租房',
+  sourceLinks: defaultSourceLinks,
+};
 
-function pickMockResult(input: AnalysisInput): LegalCase {
-  const normalized = `${input.text} ${input.scenario}`.toLowerCase();
-  const matched =
-    cases.find((item) => item.scenario === input.scenario) ??
-    cases.find((item) => normalized.includes(item.scenario.toLowerCase()));
-
-  if (matched) {
-    return {
-      ...matched,
-      userInput: input.text || matched.userInput,
-      extractedFacts: input.imageName
-        ? [`已上传图片材料：${input.imageName}`, ...matched.extractedFacts]
-        : matched.extractedFacts,
-    };
+function loadHistory(): HistoryItem[] {
+  try {
+    const raw = window.localStorage.getItem(HISTORY_KEY);
+    return raw ? (JSON.parse(raw) as HistoryItem[]) : [];
+  } catch {
+    return [];
   }
+}
 
+function getSaveTime() {
+  return new Intl.DateTimeFormat('zh-CN', {
+    month: 'numeric',
+    day: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+  }).format(new Date());
+}
+
+function createHistoryItem(input: AnalysisInput): HistoryItem {
   return {
-    userInput: input.text || '用户上传了待识别材料，但文字信息不足。',
+    id: `risk-${Date.now()}`,
     scenario: input.scenario,
-    extractedFacts: ['当前信息不足，尚不能稳定提取关键事实。'],
-    riskLevel: '无法判断',
-    relatedLaws: [],
-    explanation: '未找到明确法律依据，建议补充信息或咨询专业人士。',
-    suggestions: ['补充合同、票据、聊天记录、时间线等材料', '说明所在地区、发生时间、对方主体和诉求', '咨询律师或相关主管部门获取个案判断'],
-    disclaimer: '本工具仅提供法律信息检索与风险提示，不构成法律意见，不替代律师或司法机关判断。',
+    riskLevel: input.text ? '中风险' : '无法判断',
+    title: input.text ? `${input.scenario}法律风险检索结果` : '信息不足的法律检索结果',
+    time: getSaveTime(),
+    inputText: input.text,
+    imageName: input.imageName,
+    sourceLinks: input.sourceLinks,
   };
 }
 
 export default function App() {
   const [route, setRoute] = useState<Route>('home');
-  const [analysisInput, setAnalysisInput] = useState<AnalysisInput | null>(null);
+  const [input, setInput] = useState<AnalysisInput>(defaultInput);
+  const [history, setHistory] = useState<HistoryItem[]>(loadHistory);
 
-  const result = useMemo(() => {
-    if (!analysisInput) {
-      return cases[0];
-    }
+  useEffect(() => {
+    window.localStorage.setItem(HISTORY_KEY, JSON.stringify(history));
+  }, [history]);
 
-    return pickMockResult(analysisInput);
-  }, [analysisInput]);
+  const goInput = () => setRoute('input');
 
-  const startAnalyze = (scenario?: AnalysisInput['scenario']) => {
-    setAnalysisInput(scenario ? { text: '', scenario } : null);
-    setRoute('analyze');
+  const saveResult = () => {
+    const item = createHistoryItem(input);
+    setHistory((current) => [item, ...current.filter((record) => record.title !== item.title)].slice(0, 12));
+  };
+
+  const openHistoryItem = (item: HistoryItem) => {
+    setInput({
+      text: item.inputText || '',
+      scenario: item.scenario,
+      imageName: item.imageName,
+      sourceLinks: item.sourceLinks || defaultSourceLinks,
+    });
+    setRoute('result');
   };
 
   return (
     <main className="app-shell">
-      {route === 'home' && <Home onStart={startAnalyze} />}
-      {route === 'analyze' && (
-        <Analyze
-          initialScenario={analysisInput?.scenario}
+      {route === 'home' && <Home onImageInput={goInput} onTextInput={goInput} />}
+      {route === 'input' && (
+        <Input
+          initialInput={input}
           onBack={() => setRoute('home')}
-          onAnalyze={(input) => {
-            setAnalysisInput(input);
-            setRoute('result');
+          onStart={(nextInput) => {
+            setInput(nextInput);
+            setRoute('processing');
           }}
         />
       )}
-      {route === 'result' && <Result caseData={result} onBackHome={() => setRoute('home')} />}
+      {route === 'processing' && <Processing onDone={() => setRoute('result')} />}
+      {route === 'result' && (
+        <Result
+          input={input}
+          isSaved={history.some((item) => item.inputText === input.text && item.scenario === input.scenario)}
+          onAsk={() => setRoute('followup')}
+          onHistory={() => setRoute('history')}
+          onRestart={goInput}
+          onSave={saveResult}
+        />
+      )}
+      {route === 'followup' && <FollowUp onBack={() => setRoute('result')} />}
+      {route === 'history' && <History items={history} onBack={() => setRoute('result')} onOpen={openHistoryItem} />}
     </main>
   );
 }
