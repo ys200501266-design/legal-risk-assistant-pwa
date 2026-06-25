@@ -134,7 +134,7 @@ function inferScenario(text: string, fallback: Scenario): Scenario {
 function extractKeywords(question: string, scenario: Scenario): string[] {
   const dictionary = Array.from(new Set(LAW_INDEX.flatMap((item) => item.keywords)));
   const hits = dictionary.filter((keyword) => question.includes(keyword));
-  if (scenario !== '其他') hits.push(scenario);
+  if (hits.length === 0 && scenario !== '其他') hits.push(scenario);
   return Array.from(new Set(hits));
 }
 
@@ -176,43 +176,103 @@ function buildReasoning(laws: RelatedLaw[]): string {
   return `系统没有改写用户问题，而是从原问题中提取关键词后，在来源索引中命中 ${lawNames}。下面的方案只基于这些已定位条文和用户提供事实进行风险提示。`;
 }
 
-function buildSolution(scenario: Scenario, laws: RelatedLaw[]): string[] {
+function includesAny(text: string, words: string[]): boolean {
+  return words.some((word) => text.includes(word));
+}
+
+function buildSolution(question: string, scenario: Scenario, laws: RelatedLaw[]): string[] {
   if (!laws.length) {
     return ['补充更具体的事实，例如合同条款、发生时间、对方主体、金额和沟通记录。', '补充可检索的权威来源链接，或咨询专业人士核验适用法条。'];
   }
 
   if (scenario === '劳动') {
+    const asksOvertimePay = includesAny(question, ['加班费', '无偿加班', '不给加班费', '没有加班费', '调休', '加班到']);
+    const asksContractOnly = includesAny(question, ['劳动合同']) && !asksOvertimePay && !includesAny(question, ['工资', '离职', '解除', '赔偿', '拖欠']);
+
+    if (asksContractOnly) {
+      return [
+        '你目前只提到“劳动合同”，还没有说明具体争议点。请补充：合同哪一条、公司做了什么、你认为哪里不合理。',
+        '如果争议是加班，就补充加班时间、是否审批、是否支付加班费或安排调休；如果争议是工资，就补充工资条和实际到账记录。',
+        '在补充事实前，只能先依据劳动合同法第三十条提示：工资和劳动报酬应按合同约定和国家规定及时足额支付，不能直接判断公司责任。',
+      ];
+    }
+
+    if (asksOvertimePay) {
+      return [
+        '你的问题核心是“公司安排加班但未支付加班费或未安排调休”。先保存劳动合同、考勤记录、加班通知、工作群消息、工资条和银行流水。',
+        '对照劳动法第四十一条，核验加班是否经过协商、是否属于延长工作时间，以及每日/月度时长是否明显超过限制。',
+        '对照劳动法第四十四条，区分工作日延长工作时间、休息日加班且不能补休、法定节假日加班三种情况，再计算可能对应的加班工资标准。',
+        '先向 HR 或主管书面询问“加班依据、补偿方式、调休记录”。如果对方不回应或拒绝说明，再带证据咨询劳动监察或劳动仲裁窗口。',
+      ];
+    }
+
     return [
-      '先整理劳动合同、考勤记录、加班通知、工作群消息、工资条和银行流水。',
-      '对照已命中的劳动法第四十一条，核验加班是否经过协商以及是否超过时长限制。',
-      '对照劳动法第四十四条和劳动合同法第三十条，核验是否应支付加班工资或安排补休。',
-      '先向 HR 或主管书面询问加班依据和补偿方式；协商无果时，再带证据咨询劳动监察或劳动仲裁窗口。',
+      '你提出的是劳动类问题，但目前具体争议还不够明确。请补充：公司具体要求、发生时间、合同条款、工资或加班记录。',
+      '先不要直接下结论，先把劳动合同、工资条、考勤、通知和沟通记录放在一起核对。',
+      '再根据补充事实判断适用劳动法第四十一条、第四十四条，或劳动合同法第三十条中的哪一类问题。',
     ];
   }
 
   if (scenario === '租房') {
+    const asksDeposit = includesAny(question, ['押金', '拒退', '不退', '扣押金', '退押金', '扣款']);
+    const asksLeaseOnly = includesAny(question, ['租房合同', '租赁合同']) && !asksDeposit && !includesAny(question, ['维修', '损坏', '退租', '违约']);
+
+    if (asksLeaseOnly) {
+      return [
+        '你目前只提到“租房合同”，还没有说明具体争议。请补充：是哪一条合同条款、房东或租客做了什么、你想解决什么问题。',
+        '如果争议是押金，请补充押金金额、退租时间、房东拒退理由、是否有维修票据或损坏照片。',
+        '在事实不足前，只能先依据民法典第五百零九条提示：双方应按合同约定和诚信原则履行，不能直接判断谁违约。',
+      ];
+    }
+
+    if (asksDeposit) {
+      return [
+        '你的问题核心是“押金是否应退、房东是否有依据扣款”。先整理租房合同、押金支付记录、退租交接照片或视频、钥匙交还记录和聊天记录。',
+        '对照民法典第五百零九条，先看合同里是否写明押金扣除条件；没有明确约定时，应要求房东说明扣款依据。',
+        '对照民法典第五百七十七条，如果合同约定退租后返还押金，而房东拒退或无证据扣款，可要求其承担继续履行或赔偿损失等违约责任风险。',
+        '你可以先书面要求房东列明扣款项目、金额、维修票据和损失证明；协商不成时，再带证据咨询调解组织、住建/消协渠道或法院窗口。',
+      ];
+    }
+
     return [
-      '先整理租房合同、押金支付记录、退租交接照片或视频、钥匙交还记录和聊天记录。',
-      '对照民法典第五百零九条，核验房东扣款是否有合同依据并符合诚信履行原则。',
-      '如果房东拒退或扣押金，要求其书面列明扣款项目、金额、维修票据和损失证明。',
-      '协商不成时，可带证据咨询社区调解、消协、住建相关渠道或法院立案咨询窗口。',
+      '你提出的是租房类问题，但目前缺少具体争议点。请补充：租赁合同条款、退租时间、费用金额、对方拒绝或要求的具体内容。',
+      '先按民法典第五百零九条回到合同约定和履行事实，不要只凭口头说法判断。',
+      '把合同、付款记录、房屋照片、交接记录和聊天记录整理后，再判断是否涉及押金、维修费或违约责任。',
     ];
   }
 
   if (scenario === '消费') {
+    const asksReturn = includesAny(question, ['退货', '退款', '七天无理由', '拒绝退', '拆快递', '拆封']);
+
+    if (asksReturn) {
+      return [
+        '你的问题核心是“商家是否可以拒绝退货/退款”。先保存订单、物流签收时间、商品照片、商家拒绝退货聊天记录和平台规则截图。',
+        '对照消费者权益保护法第二十五条，先判断购买方式是否属于网络等远程销售，以及是否仍在收到商品七日内。',
+        '再判断商品是否属于条文列明的例外，例如定作、鲜活易腐、已拆封的音像制品或计算机软件等数字化商品。普通商品仅拆快递外包装，通常还要继续看是否影响二次销售。',
+        '如果商家只用笼统理由拒绝，你可以通过平台售后要求其说明具体例外依据；平台介入无果时，再考虑消费者投诉渠道。',
+      ];
+    }
+
     return [
-      '保存订单、物流签收时间、商品照片、商家拒绝退货聊天记录和平台规则截图。',
-      '对照消费者权益保护法第二十五条，先判断商品是否属于七日无理由退货例外情形。',
-      '如果商家仅以拆快递外包装为由拒绝，可通过平台售后申请并要求平台客服介入。',
-      '仍无法解决时，再考虑消费者投诉渠道，并提交订单和沟通证据。',
+      '你提出的是消费类问题，但目前未说明具体是退货、退款、质量问题还是虚假宣传。请补充订单、商品、金额、商家拒绝理由。',
+      '先保存订单和沟通记录，再根据具体争议匹配消费者权益保护法相应条款。',
+    ];
+  }
+
+  const asksBreach = includesAny(question, ['违约', '不履行', '拒绝', '赔偿', '解除', '逾期', '没按合同']);
+  if (!asksBreach && includesAny(question, ['合同'])) {
+    return [
+      '你目前只提到“合同”，还没有说明具体争议。请补充：哪一条合同、谁没有履行、造成了什么损失、你希望对方怎么处理。',
+      '在事实不足时，只能先依据民法典第五百零九条提示：合同双方应按约定全面履行并遵循诚信原则。',
+      '补充事实后，再判断是否进入民法典第五百七十七条所说的继续履行、补救措施或赔偿损失路径。',
     ];
   }
 
   return [
-    '先把合同条款、履行记录、付款记录和沟通记录整理成时间线。',
-    '对照命中的民法典合同履行和违约责任条文，判断对方具体违反了哪一项约定。',
-    '先发出书面催告，要求继续履行、采取补救措施或协商赔偿。',
-    '金额较大或证据复杂时，咨询律师评估调解、仲裁或诉讼路径。',
+    '你的问题核心是合同履行或违约。先把合同条款、履行记录、付款记录和沟通记录整理成时间线。',
+    '对照民法典第五百零九条，先确认双方各自应履行的义务和实际履行情况。',
+    '如果对方确实不履行或履行不符合约定，再对照民法典第五百七十七条，选择继续履行、补救措施或赔偿损失作为沟通诉求。',
+    '先发书面催告并保留证据；金额较大或证据复杂时，咨询律师评估调解、仲裁或诉讼路径。',
   ];
 }
 
@@ -240,7 +300,7 @@ export function analyzeLegalQuestion(input: AnalysisInput): LegalAnalysis {
     riskLevel: inferRiskLevel(relatedLaws),
     relatedLaws,
     reasoning: buildReasoning(relatedLaws),
-    solutionPlan: buildSolution(scenario, relatedLaws),
+    solutionPlan: buildSolution(userQuestion, scenario, relatedLaws),
     nextEvidence: buildEvidence(scenario),
     noBasisMessage: relatedLaws.length ? undefined : '未找到明确法律依据，建议补充信息或咨询专业人士。',
     disclaimer: '本工具仅提供法律信息检索与风险提示，不构成法律意见，不替代律师或司法机关判断。',
