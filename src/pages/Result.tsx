@@ -8,11 +8,10 @@ import {
   MessageCircle,
   RefreshCcw,
   Save,
-  ShieldAlert,
 } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
 import { analyzeLegalQuestion } from '../lib/legalAnalysis';
-import type { AnalysisInput, RiskLevel } from '../types';
+import type { AnalysisInput } from '../types';
 
 interface ResultProps {
   input: AnalysisInput;
@@ -22,13 +21,6 @@ interface ResultProps {
   onRestart: () => void;
   onSave: () => void;
 }
-
-const riskClass: Record<RiskLevel, string> = {
-  低风险: 'risk-low',
-  中风险: 'risk-medium',
-  高风险: 'risk-high',
-  无法判断: 'risk-unknown',
-};
 
 export default function Result({ input, isSaved, onAsk, onHistory, onRestart, onSave }: ResultProps) {
   const [saved, setSaved] = useState(isSaved);
@@ -51,22 +43,12 @@ export default function Result({ input, isSaved, onAsk, onHistory, onRestart, on
   return (
     <section className="phone-page result-page">
       <header className="result-header">
-        <span>{analysis.scenario}场景</span>
+        <span>检索结果</span>
         <button className="text-button" onClick={onHistory} type="button">
           <History size={16} aria-hidden="true" />
           历史记录
         </button>
       </header>
-
-      <section className="result-hero single-result-hero">
-        <div className={`risk-summary compact-risk ${riskClass[analysis.riskLevel]}`}>
-          <div>
-            <p>风险等级</p>
-            <h1>{analysis.riskLevel}</h1>
-          </div>
-          <ShieldAlert size={34} aria-hidden="true" />
-        </div>
-      </section>
 
       <section className="content-card chain-card">
         <div className="chain-step-label">1. 提出问题</div>

@@ -199,8 +199,8 @@ function searchLawIndex(question: string, scenario: Scenario): RelatedLaw[] {
     .slice(0, 4);
 }
 
-function buildFacts(input: AnalysisInput, scenario: Scenario, laws: RelatedLaw[]): string[] {
-  const facts = [`用户原问题：${input.text.trim() || '未输入文字问题'}`, `系统按关键词判断问题类型为：${scenario}`];
+function buildFacts(input: AnalysisInput, laws: RelatedLaw[]): string[] {
+  const facts = [`用户原问题：${input.text.trim() || '未输入文字问题'}`];
   if (input.imageName) facts.push(`用户上传了材料：${input.imageName}，正式版应先 OCR 后再检索。`);
   if (laws.length) {
     facts.push(`检索命中关键词：${Array.from(new Set(laws.flatMap((law) => law.matchedKeywords))).join('、')}`);
@@ -355,7 +355,7 @@ export function analyzeLegalQuestion(input: AnalysisInput): LegalAnalysis {
     scenario,
     searchSources,
     searchKeywords,
-    extractedFacts: buildFacts(input, scenario, relatedLaws),
+    extractedFacts: buildFacts(input, relatedLaws),
     riskLevel: inferRiskLevel(relatedLaws),
     relatedLaws,
     reasoning: buildReasoning(relatedLaws),

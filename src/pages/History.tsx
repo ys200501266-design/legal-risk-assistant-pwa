@@ -30,9 +30,6 @@ export default function History({ items, onBack, onOpen }: HistoryProps) {
           {items.map((item) => (
             <article className="history-item" key={item.id}>
               <div>
-                <span className="record-meta">
-                  {item.scenario} · {item.riskLevel}
-                </span>
                 <strong>{item.title}</strong>
                 <span>{item.time}</span>
               </div>

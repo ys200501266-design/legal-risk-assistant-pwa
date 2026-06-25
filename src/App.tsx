@@ -12,7 +12,7 @@ const HISTORY_KEY = 'legal-risk-assistant-history';
 
 const defaultInput: AnalysisInput = {
   text: '',
-  scenario: '租房',
+  scenario: '其他',
   sourceLinks: defaultSourceLinks,
 };
 
@@ -39,7 +39,7 @@ function createHistoryItem(input: AnalysisInput): HistoryItem {
     id: `risk-${Date.now()}`,
     scenario: input.scenario,
     riskLevel: input.text ? '中风险' : '无法判断',
-    title: input.text ? `${input.scenario}法律风险检索结果` : '信息不足的法律检索结果',
+    title: input.text ? '法律条文检索结果' : '信息不足的法律检索结果',
     time: getSaveTime(),
     inputText: input.text,
     imageName: input.imageName,

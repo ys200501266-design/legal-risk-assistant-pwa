@@ -1,9 +1,7 @@
-import { ArrowLeft, Camera, FileText, Link2, Sparkles } from 'lucide-react';
+import { ArrowLeft, Camera, FileText, Link2 } from 'lucide-react';
 import { useState } from 'react';
 import { defaultSourceLinks } from '../lib/legalAnalysis';
-import type { AnalysisInput, Scenario } from '../types';
-
-const scenarios: Scenario[] = ['合同', '租房', '劳动', '消费', '聊天记录', '其他'];
+import type { AnalysisInput } from '../types';
 
 interface InputProps {
   initialInput: AnalysisInput;
@@ -16,7 +14,6 @@ export default function Input({ initialInput, onBack, onStart }: InputProps) {
     initialInput.text ||
       '例如：公司要求我每天加班到晚上十点，但是没有加班费，也没有安排调休。劳动合同里只写了标准工时。',
   );
-  const [scenario, setScenario] = useState<Scenario>(initialInput.scenario || '劳动');
   const [imageName, setImageName] = useState(initialInput.imageName || '');
   const [sourceLinks, setSourceLinks] = useState(initialInput.sourceLinks || defaultSourceLinks);
   const [error, setError] = useState('');
@@ -33,7 +30,7 @@ export default function Input({ initialInput, onBack, onStart }: InputProps) {
     }
 
     setError('');
-    onStart({ text, scenario, imageName, sourceLinks });
+    onStart({ text, scenario: '其他', imageName, sourceLinks });
   };
 
   return (
@@ -89,25 +86,6 @@ export default function Input({ initialInput, onBack, onStart }: InputProps) {
           value={sourceLinks}
         />
         <p className="helper-text">结果页会先展示已查找的链接；没有明确法条依据时，不给确定方案。</p>
-      </section>
-
-      <section className="form-block">
-        <div className="field-title">
-          <Sparkles size={18} aria-hidden="true" />
-          <span>问题类型</span>
-        </div>
-        <div className="tag-group">
-          {scenarios.map((item) => (
-            <button
-              className={item === scenario ? 'tag active' : 'tag'}
-              key={item}
-              onClick={() => setScenario(item)}
-              type="button"
-            >
-              {item}
-            </button>
-          ))}
-        </div>
       </section>
 
       {error ? <p className="form-error">{error}</p> : null}
