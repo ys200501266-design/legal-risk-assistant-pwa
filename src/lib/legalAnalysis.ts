@@ -167,7 +167,7 @@ function inferRiskLevel(laws: RelatedLaw[]): RiskLevel {
   return laws.length >= 2 ? '中风险' : '低风险';
 }
 
-function buildReasoning(question: string, laws: RelatedLaw[]): string {
+function buildReasoning(laws: RelatedLaw[]): string {
   if (!laws.length) {
     return '系统未能从当前来源索引中定位到与用户关键词直接匹配的具体条文，因此不生成确定性解决方案。';
   }
@@ -176,7 +176,7 @@ function buildReasoning(question: string, laws: RelatedLaw[]): string {
   return `系统没有改写用户问题，而是从原问题中提取关键词后，在来源索引中命中 ${lawNames}。下面的方案只基于这些已定位条文和用户提供事实进行风险提示。`;
 }
 
-function buildSolution(question: string, scenario: Scenario, laws: RelatedLaw[]): string[] {
+function buildSolution(scenario: Scenario, laws: RelatedLaw[]): string[] {
   if (!laws.length) {
     return ['补充更具体的事实，例如合同条款、发生时间、对方主体、金额和沟通记录。', '补充可检索的权威来源链接，或咨询专业人士核验适用法条。'];
   }
@@ -239,8 +239,8 @@ export function analyzeLegalQuestion(input: AnalysisInput): LegalAnalysis {
     extractedFacts: buildFacts(input, scenario, relatedLaws),
     riskLevel: inferRiskLevel(relatedLaws),
     relatedLaws,
-    reasoning: buildReasoning(userQuestion, relatedLaws),
-    solutionPlan: buildSolution(userQuestion, scenario, relatedLaws),
+    reasoning: buildReasoning(relatedLaws),
+    solutionPlan: buildSolution(scenario, relatedLaws),
     nextEvidence: buildEvidence(scenario),
     noBasisMessage: relatedLaws.length ? undefined : '未找到明确法律依据，建议补充信息或咨询专业人士。',
     disclaimer: '本工具仅提供法律信息检索与风险提示，不构成法律意见，不替代律师或司法机关判断。',
