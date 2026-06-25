@@ -591,6 +591,26 @@ textarea:focus,
   margin-top: 12px;
 }
 
+.keyword-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.keyword-row span {
+  display: inline-flex;
+  min-height: 30px;
+  align-items: center;
+  padding: 0 10px;
+  color: #244b42;
+  background: #e7f5ef;
+  border: 1px solid #bdd7cf;
+  border-radius: 8px;
+  font-size: 0.82rem;
+  font-weight: 900;
+}
+
 .source-item {
   display: flex;
   align-items: center;
@@ -661,6 +681,12 @@ textarea:focus,
 .relevance-text {
   margin-top: 10px;
   color: #425466 !important;
+}
+
+.law-summary-text {
+  margin-top: 10px;
+  color: #536173 !important;
+  font-size: 0.88rem !important;
 }
 
 .evidence-list {

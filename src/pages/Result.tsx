@@ -70,8 +70,8 @@ export default function Result({ input, isSaved, onAsk, onHistory, onRestart, on
 
       <section className="content-card chain-card">
         <div className="chain-step-label">1. 提出问题</div>
-        <h2>识别到的问题</h2>
-        <p className="lead-text">{analysis.recognizedQuestion}</p>
+        <h2>用户原问题</h2>
+        <p className="lead-text">{analysis.userQuestion}</p>
         <ul className="fact-list">
           {analysis.extractedFacts.map((fact) => (
             <li key={fact}>{fact}</li>
@@ -84,7 +84,14 @@ export default function Result({ input, isSaved, onAsk, onHistory, onRestart, on
           <Link2 size={19} aria-hidden="true" />
           <h2>2. 查找链接</h2>
         </div>
-        <p className="helper-text no-margin">本次结果只基于下列来源链接进行模拟检索；正式版应实时抓取或接入法规库。</p>
+        <p className="helper-text no-margin">系统先从用户原问题中提取关键词，再到下列来源中定位法条。Demo 使用内置法规索引模拟检索；正式版应实时抓取用户提供链接正文。</p>
+        {analysis.searchKeywords.length ? (
+          <div className="keyword-row" aria-label="命中关键词">
+            {analysis.searchKeywords.map((keyword) => (
+              <span key={keyword}>{keyword}</span>
+            ))}
+          </div>
+        ) : null}
         <div className="source-list">
           {analysis.searchSources.map((source) => (
             <a className="source-item" href={source.url} key={`${source.title}-${source.url}`} rel="noreferrer" target="_blank">
@@ -121,9 +128,13 @@ export default function Result({ input, isSaved, onAsk, onHistory, onRestart, on
                   </a>
                 </div>
                 <div className="quote-box compact-quote">
-                  <strong>条文摘要</strong>
-                  <p>{law.summary}</p>
+                  <strong>来源原文摘录（未改写）</strong>
+                  <p>{law.originalExcerpt}</p>
                 </div>
+                <p className="law-summary-text">
+                  <strong>系统摘要：</strong>
+                  {law.summary}
+                </p>
                 <p className="relevance-text">
                   <strong>与本问题的关系：</strong>
                   {law.relevance}

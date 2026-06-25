@@ -22,14 +22,18 @@ export interface RelatedLaw {
   article: string;
   articleTitle?: string;
   summary: string;
+  originalExcerpt: string;
   sourceUrl: string;
   relevance: string;
+  matchedKeywords: string[];
 }
 
 export interface LegalAnalysis {
+  userQuestion: string;
   recognizedQuestion: string;
   scenario: Scenario;
   searchSources: LegalSource[];
+  searchKeywords: string[];
   extractedFacts: string[];
   riskLevel: RiskLevel;
   relatedLaws: RelatedLaw[];
