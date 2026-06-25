@@ -48,6 +48,55 @@ const LAW_INDEX: LawIndexItem[] = [
   {
     sourceTitle: '国家法律法规数据库',
     lawName: '中华人民共和国劳动合同法',
+    article: '第二条',
+    articleTitle: '适用范围',
+    keywords: ['实习生', '实习', '劳动合同', '劳务合同', '劳动关系', '用人单位', '劳动者'],
+    originalExcerpt:
+      '中华人民共和国境内的企业、个体经济组织、民办非企业单位等组织与劳动者建立劳动关系，订立、履行、变更、解除或者终止劳动合同，适用本法。',
+    summary: '该条说明劳动合同法适用于用人单位与劳动者建立劳动关系的情形。',
+    sourceUrl: 'https://flk.npc.gov.cn/',
+    relevance: '用户问“实习生签劳动合同还是劳务合同”，关键不是“实习生”这个称呼，而是是否与单位建立劳动关系。',
+    matchedKeywords: [],
+  },
+  {
+    sourceTitle: '国家法律法规数据库',
+    lawName: '中华人民共和国劳动合同法',
+    article: '第七条',
+    articleTitle: '劳动关系建立',
+    keywords: ['实习生', '实习', '劳动关系', '用工', '入职', '劳动合同'],
+    originalExcerpt: '用人单位自用工之日起即与劳动者建立劳动关系。',
+    summary: '该条说明劳动关系通常从实际用工之日起建立。',
+    sourceUrl: 'https://flk.npc.gov.cn/',
+    relevance: '如果实习生实际接受单位管理、提供劳动并取得报酬，需要重点判断是否已形成用工和劳动关系。',
+    matchedKeywords: [],
+  },
+  {
+    sourceTitle: '国家法律法规数据库',
+    lawName: '中华人民共和国劳动合同法',
+    article: '第十条',
+    articleTitle: '订立书面劳动合同',
+    keywords: ['实习生', '实习', '劳动合同', '书面劳动合同', '劳动关系', '用工'],
+    originalExcerpt: '建立劳动关系，应当订立书面劳动合同。',
+    summary: '该条直接规定建立劳动关系时应当订立书面劳动合同。',
+    sourceUrl: 'https://flk.npc.gov.cn/',
+    relevance: '如果实习安排已经构成劳动关系，依据该条应签书面劳动合同，而不是仅以“劳务合同”替代。',
+    matchedKeywords: [],
+  },
+  {
+    sourceTitle: '国家法律法规数据库',
+    lawName: '中华人民共和国民法典',
+    article: '第四百六十四条',
+    articleTitle: '合同定义',
+    keywords: ['实习生', '实习', '劳务合同', '民事合同', '协议', '合同'],
+    originalExcerpt: '合同是民事主体之间设立、变更、终止民事法律关系的协议。',
+    summary: '该条可用于说明不属于劳动关系的实习、劳务或合作安排，可能回到民事合同规则处理。',
+    sourceUrl: 'https://flk.npc.gov.cn/',
+    relevance: '如果只是教学实习、短期实践或非劳动关系安排，可能签署实习协议、劳务协议等民事合同，但仍需看实际权利义务。',
+    matchedKeywords: [],
+  },
+  {
+    sourceTitle: '国家法律法规数据库',
+    lawName: '中华人民共和国劳动法',
     article: '第三十条',
     articleTitle: '劳动报酬',
     keywords: ['工资', '劳动报酬', '拖欠工资', '加班费', '劳动合同'],
@@ -187,7 +236,17 @@ function buildSolution(question: string, scenario: Scenario, laws: RelatedLaw[])
 
   if (scenario === '劳动') {
     const asksOvertimePay = includesAny(question, ['加班费', '无偿加班', '不给加班费', '没有加班费', '调休', '加班到']);
+    const asksInternContract = includesAny(question, ['实习生', '实习']) && includesAny(question, ['劳动合同', '劳务合同', '签什么合同', '签哪种合同', '合同']);
     const asksContractOnly = includesAny(question, ['劳动合同']) && !asksOvertimePay && !includesAny(question, ['工资', '离职', '解除', '赔偿', '拖欠']);
+
+    if (asksInternContract) {
+      return [
+        '结论：不能只因为身份叫“实习生”就一律签劳务合同。法律判断点是是否建立劳动关系。',
+        '如果实习生与单位之间已经形成实际用工关系，例如接受单位日常管理、按岗位提供劳动、取得劳动报酬，依据劳动合同法第二条、第七条、第十条，应按劳动关系处理，并订立书面劳动合同。',
+        '如果只是学校教学安排、短期实践、观摩培训，双方没有建立劳动法意义上的用工管理和劳动报酬关系，则通常不按劳动合同处理，可以签实习协议或劳务性质的民事协议，适用民法典合同规则。',
+        '所以回答你的问题：实习生签劳动合同还是劳务合同，不能看名称，要看实际关系；构成劳动关系签劳动合同，不构成劳动关系才考虑实习协议/劳务协议。',
+      ];
+    }
 
     if (asksContractOnly) {
       return [
